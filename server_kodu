@@ -1,0 +1,404 @@
+
+#include <stdio.h>
+#include <winsock2.h>
+#include <stdlib.h>
+#pragma comment(lib, "ws2_32.lib")
+#define PORT 8080
+#include <windows.h>
+#include <conio.h>
+#include <time.h>
+void gotoxy(int x, int y) {
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+void gotoxy2(int x, int y) {
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+    char *ascii_art[] = {
+        "               ,---.                    ,-,--.    _,.---._                   ,---.        ,-,--.  ,--.-,,-,--,       ",
+        "    _..---.  .--.'  \\      _,..---._  ,-.'-  _\\ ,-.' - ,  `.   .--.-. .-.-..--.'  \\     ,-.'-  _\\/==/  /|=|  |       ",
+        "  .' .'.-. \\ \\==\\-/\\ \\   /==/,   -  \\/==/_ ,_.'/==/ ,    -  \\ /==/ -|/=/  |\\==\\-/\\ \\   /==/_ ,_.'|==|_ ||=|, |       ",
+        " /==/- '=' / /==/-|_\\ |  |==|   _   _\\==\\  \\  |==| - .=.  ,  ||==| ,||=| -|/==/-|_\\ |  \\==\\  \\   |==| ,|/=| _|       ",
+        " |==|-,   '  \\==\\,   - \\ |==|  .=.   |\\==\\ -\\ |==|  : ;=:  - ||==|- | =/  |\\==\\,   - \\  \\==\\ -\\  |==|- `-' _ |       ",
+        " |==|  .=. \\ /==/ -   ,| |==|,|   | -|_\\==\\ ,\\|==|,  '='  ,  ||==|,  \\/ - |/==/ -   ,|  _\\==\\ ,\\ |==|  _     |       ",
+        " /==/- '=' ,/==/-  /\\ - \\|==|  '='   /==/\\/ _ |\\==\\ _   -    ;|==|-   ,   /==/-  /\\ - \\/==/\\/ _ ||==|   .-. ,\\       ",
+        "|==|   -   /\\==\\ _.\\=\\.-'|==|-,   _`/\\==\\ - , / '.='.  ,  ; -\\/==/ , _  .\\==\\ _.\\=\\.-'\\==\\ - , //==/, //=/  |       ",
+        "`-._`.___,'  `--`        `-.`.____.'  `--`---'    `--`--'' `--`--`..---'   `--`         `--`---' `--`-' `-`--`    "
+    };
+int main() {
+
+
+    WSADATA wsaData;//program çalışınca gelen verileri tutar
+    SOCKET serverSocket, clientSocket;//serversocket sunucunun istemciyle bağlar clientsocket ise istemci ile iletişim kurar
+    struct sockaddr_in serverAddr, clientAddr;//ip ve ağ adres bilgisini tutar
+    int clientAddrSize = sizeof(clientAddr);
+    int bytesRead;
+    char gelenChar;  // Gelen karakter için bir değişken int olan
+    int bytesReceived;//alınan diğer bilgiler için karakter olan
+    int addrSize;
+     int bytesSent;//gönderilen bilgi
+     int i,z;
+    // Winsock başlatılıyor
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        printf("WINSOCK HATASI\n");
+        return 1;
+    }//2.2 sürümğ belirtir ve başarılı şekilde çalışmazsa hata döndürür
+
+    // Sunucu soketi oluşturuluyor
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);//verinin sırasıyla iletilmesinide saglar
+    if (serverSocket == INVALID_SOCKET) {
+        printf("SOCKET HATASI\n");
+        WSACleanup();
+        return 1;
+    }
+
+    // Sunucu adresini ayarlar
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;  // Tüm IP adreslerinden gelen bağlantılara açık
+
+    // Soketi bağla (bind)
+    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        printf("BAGLANTI HATASI\n");
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    // Bağlantıları dinle ve 5 istemciye kadar dinleme yapabilir
+    if (listen(serverSocket, 5) == SOCKET_ERROR) {
+        printf("DINLEME HATASI\n");
+        closesocket(serverSocket);//socketi kapar
+        WSACleanup();
+        return 1;
+    }
+    printf("ISTEMCININ CALISTIRILMASI BEKLENIYOR");
+
+    // Bağlantı kabul et istemcinin baglantısını kabul eder
+    clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
+    if (clientSocket == INVALID_SOCKET) {
+        printf("BAGLANTI HATASI\n");
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    system("cls");
+    // For döngüsü ile her satırı ekrana yazdırıyoruz
+       for (z = 0; z < 9; z++) {
+            gotoxy(2,2+z);
+
+                      printf("\033[34m %s\033[0m\n", ascii_art[z]);
+            usleep(100000);
+        }
+
+    for(i=1;i<113;i++){
+        gotoxy(i,0);
+        printf("\033[34m%c\033[0m",205);
+        usleep(10000);
+        gotoxy(i,17);
+               printf("\033[34m%c\033[0m",205);
+    }
+    for(i=0;i<17;i++)
+    {
+        gotoxy(0,i);
+            printf("\033[34m%c\033[0m",186);
+        usleep(10000);
+    }
+
+
+    for(i=1;i<17;i++)
+    {
+        gotoxy(113,i);
+                    printf("\033[34m%c\033[0m",186);
+        usleep(10000);
+    }
+    gotoxy(0,0);
+                printf("\033[34m%c\033[0m",201);
+    gotoxy(0,17);
+            printf("\033[34m%c\033[0m",200);
+    gotoxy(113,17);
+            printf("\033[34m%c\033[0m",188);
+    gotoxy(113,0);
+            printf("\033[34m%c\033[0m",187);
+
+    gotoxy(30,11);
+ printf("NE BADMINTON NE SQUASH BADSQUASH");
+ gotoxy(30,12);
+ printf("NEITHER BADMINTON NOR SQUASH JUST BADSQUASH ");
+ gotoxy(30,13);
+    printf("KONTROL TUSLARIMIZ W/S TUSLARIDIR BASLAMAK ICIN HERHANGI BIR TUSA BASINIZ");
+gotoxy(30,14);
+printf("OUR CONTROL KEYS ARE W/S KEYS PRESS ANY KEY TO START");
+getch();
+system("cls");
+
+int sayi;
+	int hak1=5;
+	int hak2=5;
+	int eng=2;
+	int hareket_sayisi;
+    int OYUNCUX = 78, OYUNCUY = 12;
+    char smiley = 1;
+    srand(time(NULL));
+int OYUNCUX2=2,OYUNCUY2=12;
+int setX,setY;
+int x, y;
+
+
+
+    for (y = 0; y <= 25; y++) {
+        for (x = 0; x <= 80; x++) { //platformu ve sınırı oluşturuyoruz
+            if (y == 0 || y == 25 || x == 0 || x == 80)
+                {
+				printf("%c",219);}
+            else
+                printf(" ");
+        }
+        printf("\n");
+    }
+
+    // Zıplayan top için başlangıç pozisyonu
+    int topX = 40, topY = 12; // Başlangıç pozisyonu
+    int topDirectionY = 1;   // Y ekseninde hareket yönü
+    int topDirectionX = 1;   // X ekseninde hareket yönü
+    int c;
+
+
+
+    int maxX = 79;
+    int maxY = 24;//sınırlar
+
+		sayi=0;
+
+     topDirectionY = 1;
+     topDirectionX = 1;
+     c;
+
+
+	gotoxy(0,26);
+for(i=1;i<=hak1;i++){
+            	printf("*");
+			}
+			gotoxy(76,26);
+for(i=1;i<=hak2;i++){
+            	printf("*");
+			}//kalna hakları gösterir
+
+ do {
+
+             if(eng==2){
+
+    	 bytesReceived = recv(clientSocket, (char*)&sayi, sizeof(topX), 0);
+if(sayi==2)
+        {
+		gotoxy(setX,setY);
+        printf(" ");
+        gotoxy(setX,setY+1);
+        printf(" ");
+		gotoxy(setX,setY+2);
+        printf(" ");
+        gotoxy(setX,setY+3);
+        printf(" ");
+
+         bytesReceived = recv(clientSocket, (char*)&setX, sizeof(setX), 0);
+
+
+        bytesReceived = recv(clientSocket, (char*)&setY, sizeof(setY), 0);//setin x ve y eksenindeki konumlarını istemciden alırız
+
+
+	gotoxy(setX,setY);
+        printf("\033[31;41m*\033[0m");
+        gotoxy(setX,setY+1);
+        printf("\033[31;41m*\033[0m");
+     gotoxy(setX,setY+2);
+        printf("\033[31;41m*\033[0m");
+        gotoxy(setX,setY+3);
+        printf("\033[31;41m*\033[0m");
+
+
+
+		}
+		else ;
+		}
+
+
+
+                bytesReceived = recv(clientSocket, &gelenChar, sizeof(gelenChar), 0); // istemciden oyuncunun hareketini alırız
+        if (bytesReceived <= 0) {
+            printf("VERI ALIM HATASI\n");
+            break;
+        }
+
+            gotoxy(OYUNCUX, OYUNCUY);
+            printf(" "); // Eski karakteri sil
+              gotoxy(OYUNCUX, OYUNCUY+1);
+            printf(" ");
+            gotoxy(OYUNCUX, OYUNCUY+2);
+            printf(" ");
+              gotoxy(OYUNCUX, OYUNCUY+3);
+            printf(" ");
+
+
+            if (_kbhit()) {
+    gotoxy(OYUNCUX2, OYUNCUY2);
+    printf(" ");  // Eski pozisyonu temizle
+    gotoxy(OYUNCUX2, OYUNCUY2+1);
+    printf(" ");
+    gotoxy(OYUNCUX2, OYUNCUY2+2);
+    printf(" ");
+    gotoxy(OYUNCUX2, OYUNCUY2+3);
+    printf(" ");
+
+
+        c = _getch();  // tuşları okur ve basılan tuşa göre istemciye bilgi gönderir
+        if (c == 'W' || c=='w') {
+            OYUNCUY2--;  // Yukarı hareket et
+            sayi = sayi + 2;
+            hareket_sayisi = hareket_sayisi + 1;
+char c2='W';
+ bytesSent = send(clientSocket, &c2, 1, 0);
+
+        } else if (c == 'S'|| c=='s') {
+            OYUNCUY2++;  // Aşağı hareket et
+            hareket_sayisi = hareket_sayisi + 1;
+            sayi = sayi + 2;
+            char c2='S';
+             bytesSent = send(clientSocket, &c2, 1, 0);
+
+        }
+        else{
+            char c2='q';
+            bytesSent=send(clientSocket,&c2,1,0);
+        }
+
+
+                  gotoxy(OYUNCUX2, OYUNCUY2);
+            printf("%c",219);
+            gotoxy(OYUNCUX2, OYUNCUY2+1);
+            printf("%c",219);
+              gotoxy(OYUNCUX2, OYUNCUY2+2);
+            printf("%c",219);
+             gotoxy(OYUNCUX2, OYUNCUY2+3);
+            printf("%c",219);
+
+            }
+else{
+        char c2='q';
+     bytesSent = send(clientSocket, &c2, 1, 0);//karışıklık olmaması için herhangi bir tuşa basıldığında değeri olmayan bilgi gönderilir
+}
+
+            if (OYUNCUY2 < 1) OYUNCUY2 = 1;
+            if (OYUNCUY2 > 21) OYUNCUY2 = 21;
+            if (gelenChar == 'H') {
+                        OYUNCUY--;
+//gelen bilgiye göre oyuncu harket ettirilir
+				sayi=sayi+2;
+				hareket_sayisi=hareket_sayisi+1;
+				} // Yukarı ok tuşu
+                else if (gelenChar == 'P') {OYUNCUY++;
+				hareket_sayisi =hareket_sayisi+1;
+				sayi=sayi+2;
+				} // Aşağı ok tuşu
+
+
+            if (OYUNCUX < 1) OYUNCUX = 1;
+            if (OYUNCUX > 79) OYUNCUX = 79;
+            if (OYUNCUY < 1) OYUNCUY = 1;
+            if (OYUNCUY > 21) OYUNCUY = 21;
+
+   gotoxy(OYUNCUX, OYUNCUY);
+            printf("\033[34;44m*\033[0m");
+             gotoxy(OYUNCUX, OYUNCUY+1);
+            printf("\033[34;44m*\033[0m");
+              gotoxy(OYUNCUX, OYUNCUY+2);
+            printf("\033[34;44m*\033[0m");
+             gotoxy(OYUNCUX, OYUNCUY+3);
+            printf("\033[34;44m*\033[0m");
+
+gotoxy(topX, topY);
+        printf(" ");
+        bytesReceived = recv(clientSocket, (char*)&topX, sizeof(topX), 0);
+
+
+        bytesReceived = recv(clientSocket, (char*)&topY, sizeof(topY), 0);//topun x y kordinat bilgileri gelir
+
+
+        // Yeni top pozisyonunu ekrana yazdır
+        gotoxy(topX, topY);
+        printf("0");
+
+        // Topun hareketini uygulanır
+
+            if (topX == 1) {
+        topX = 1; // Sol sınır
+            hak1=hak1-1;
+
+		     gotoxy(0,26);
+             for(i=1;i<=5;i++){
+            	printf(" ");
+			}
+			gotoxy(0,26);
+            for(i=1;i<=hak1;i++){
+            	printf("*");
+			}
+        }
+        if (topX == maxX) {
+            topX = maxX; // Sağ sınır
+            hak2=hak2-1;
+
+     gotoxy(76,26);
+             for(i=1;i<=5;i++){
+            	printf(" ");
+			}
+			gotoxy(76,26);
+            for(i=1;i<=hak2;i++){
+            	printf("*");
+			}//kalan hakları gösterir
+
+        }
+        // Hareketin daha yumuşak olması için küçük bir gecikme ekle
+        Sleep(60);
+
+
+
+        sayi=0;
+    }while(hak1>0 && hak2>0);
+
+    system("cls");
+    //gotoxy(40,10);
+
+    gotoxy(40,10);
+    printf("OYNUMUZ BITMISTIR ");
+    gotoxy(40,11);
+    printf("OYUNCU 1 KALAN CAN SAYISI : %d",hak1);
+    gotoxy(40,12);
+    printf("OYUNCU 2 KALAN CAN SAYISI : %d",hak2);
+    gotoxy(40,13);
+    if(hak1>hak2)
+    printf("OYNUMUZ BITMISTIR  KAZANAN BIRINCI OYUNCU TEBRIKLER ");
+
+else if(hak2>hak1)
+        printf("OYNUMUZ BITMISTIR KAZANAN IKINCI OYUNCU TEBRIKLER ");
+else
+printf("BAGLANTI KOPMASI PROBLEMI OLABILIR");
+
+
+
+    // Bağlantıyı kapat
+    closesocket(clientSocket);
+    closesocket(serverSocket);
+    WSACleanup();
+
+    return 0;
+}
+
+
+
+
